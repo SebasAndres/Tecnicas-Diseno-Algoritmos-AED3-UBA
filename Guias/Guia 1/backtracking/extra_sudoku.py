@@ -1,6 +1,7 @@
 def sudoku(T):
 	if T.estaCompleto():
 		return T
+	
 	for n in range(10):
 		if T.esValidoInsertar(n):
 			T.insertar(n)
