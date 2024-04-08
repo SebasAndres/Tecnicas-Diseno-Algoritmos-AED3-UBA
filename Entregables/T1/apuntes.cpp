@@ -57,7 +57,8 @@ void backtrack(
     vector<tuple<string, int, int>>& bestTeam,
     int& maxAttack,
     int& maxDefense,
-    unordered_set<int>& available){
+    unordered_set<int>& available,
+    int maxAttackPossible){
     
     if (available.size() == 5){         
         vector<tuple<string, int, int>> tmp = buildTeam(players, available);
@@ -78,20 +79,20 @@ void backtrack(
         unordered_set<int> available_ = available;
         available_.erase(i);
 
-        // Poda por optimalidad
-        // if (available.size() <= 8){ 
-        //     int actualAttack = 0;
-        //     forn(a, 10){
-        //         if (available.find(a) != available.end()){
-        //             actualAttack += get<1>(players[a]);
-        //         }
-        //     }
-        //     if (actualAttack + get<1>(players[0]) + get<1>(players[1]) + get<1>(players[2]) < maxAttack){
-        //         return;
-        //     }
-        // }
+        // Poda
+        if (available.size() <= 8){ 
+            int actualAttack = 0;
+            forn(a, 10){
+                if (available.find(a) != available.end()){
+                    actualAttack += get<1>(players[a]);
+                }
+            }
+            if (actualAttack + get<1>(players[0]) + get<1>(players[1]) + get<1>(players[2]) < maxAttackPossible){
+                return;
+            }
+        }
 
-        backtrack(players, bestTeam, maxAttack, maxDefense, available_);
+        backtrack(players, bestTeam, maxAttack, maxDefense, available_, maxAttackPossible);
         available_.insert(i);
     }
 }
@@ -104,23 +105,36 @@ vector<string> solve(vector<tuple<string, int, int>> players){
         players.begin(),
         players.end(),
         [](const tuple<string, int, int>& a, const tuple<string, int, int>& b) {
-            return get<0>(a) < get<0>(b); 
+            return get<1>(a) > get<1>(b); 
         }
     );
-    auto comp = [](const tuple<string, int, int>& a, const tuple<string, int, int>& b) {
-        return get<1>(a) > get<1>(b); 
-    };
-    auto maxPlayer = *max_element(players.begin(), players.end(), comp);
-    int maxPlayerIndex = distance(players.begin(), find(players.begin(), players.end(), maxPlayer));
-    available.erase(maxPlayerIndex);
+    int maxAttackPossible = 0;
+    forn(p, 5){
+        maxAttackPossible += get<1>(players[p]);
+    }
+
+    // unordered_map<string, int> playersIndex(players.size());
+    // forn(w,  10){
+    //     playersIndex[get<0>(players[w])] = w;
+    // }    
+    // forn(i, 4){
+    //     if (get<1>(players[i]) == get<1>(players[i+1])){
+    //         break;
+    //     }
+    //     else {
+    //         auto pIndex_it = playersIndex.find(get<0>(players[i]));
+    //         int pIndex = pIndex_it->second;
+    //         available.erase(pIndex);
+    //     }
+    // }
 
     // Aplicamos backtracking para agarrar los primeros 5
     vector<tuple<string, int, int>> bestTeam(10);
     vector<tuple<string, int, int>> tmp;
-    int maxAttack = -1;
+    int maxAttack = 0;
     int maxDefense = 0;
 
-    backtrack(players, bestTeam, maxAttack, maxDefense, available);
+    backtrack(players, bestTeam, maxAttack, maxDefense, available, maxAttackPossible);
 
     // ordenamos alfabeticamente a los primeros 5 jugadores
     sort(
