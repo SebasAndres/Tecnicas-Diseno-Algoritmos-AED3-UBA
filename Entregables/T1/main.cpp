@@ -11,7 +11,7 @@ void backtrack(
     vector<tuple<string, int, int, int>>& jugadores,
     vector<tuple<string, int, int, int>>& equipo,
     int index,
-    vector<tuple<string, int, int, int>>& max_equipo,
+    vector<tuple<string, int, int, int>>& mejor_equipo,
     int& max_ataque,
     int& max_defensa,
     vector<string>& min_nombre){
@@ -20,16 +20,16 @@ void backtrack(
     if (equipo.size() == 5) { 
 
         // Calculamos el ataque con los 5 jugadores elegidos      
-        int ataque_actual = 0;
+        int ataque = 0;
         for (const auto& jugador : equipo) {
-            ataque_actual += get<1>(jugador);
+            ataque += get<1>(jugador);
         }
 
         // Calculamos la defensa con los 5 jugadores NO elegidos
-        int defensa_actual = 0;
+        int defensa = 0;
         for (const auto& jugador : jugadores) {
             if (find(equipo.begin(), equipo.end(), jugador) == equipo.end()) {
-                defensa_actual += get<2>(jugador);
+                defensa += get<2>(jugador);
             }
         }
 
@@ -39,14 +39,14 @@ void backtrack(
             nombre_actual.push_back(get<0>(jugador));
         }
 
-        if (ataque_actual > max_ataque ||
-            (ataque_actual == max_ataque && defensa_actual > max_defensa) ||
-            (ataque_actual == max_ataque && defensa_actual == max_defensa && nombre_actual < min_nombre)){
+        if (ataque > max_ataque ||
+            (ataque == max_ataque && defensa > max_defensa) ||
+            (ataque == max_ataque && defensa == max_defensa && nombre_actual < min_nombre)){
             // Si es mejor que el maximo, actualizar las estructuras globales
-            max_ataque = ataque_actual;
-            max_defensa = defensa_actual;
             min_nombre = nombre_actual;
-            max_equipo = equipo;
+            mejor_equipo = equipo;
+            max_ataque = ataque;
+            max_defensa = defensa;
         }
         return;
     }
@@ -59,11 +59,11 @@ void backtrack(
     // Agrego el i-esimo jugador
     equipo.push_back(jugadores[index]);
     // Aplico bactrack para el equipo con ese jugador, desde el proximo indice
-    backtrack(jugadores, equipo, index + 1, max_equipo, max_ataque, max_defensa, min_nombre);
+    backtrack(jugadores, equipo, index + 1, mejor_equipo, max_ataque, max_defensa, min_nombre);
     // Saco el i-esimo jugador
     equipo.pop_back();
     // Aplico backtrack para el equipo sin ese jugador, desde el proximo indice
-    backtrack(jugadores, equipo, index + 1, max_equipo, max_ataque, max_defensa, min_nombre);
+    backtrack(jugadores, equipo, index + 1, mejor_equipo, max_ataque, max_defensa, min_nombre);
 }
 
 void maradona() {
@@ -93,21 +93,21 @@ void maradona() {
         int max_defensa = 0;
         vector<string> min_nombre;
         vector<tuple<string, int, int, int>> t_delanteros;
-        vector<tuple<string, int, int, int>> max_equipo;
-        backtrack(jugadores, t_delanteros, 0, max_equipo, max_ataque, max_defensa, min_nombre);
+        vector<tuple<string, int, int, int>> mejor_equipo;
+        backtrack(jugadores, t_delanteros, 0, mejor_equipo, max_ataque, max_defensa, min_nombre);
 
         // Le agregamos al equipo con 5 jugadores delanteros, los 5 
         // jugadores defensores restantes 
         vector<string> defensores;
         for (const auto& jugador : jugadores) {
-            if (find(max_equipo.begin(), max_equipo.end(), jugador) == max_equipo.end()){
+            if (find(mejor_equipo.begin(), mejor_equipo.end(), jugador) == mejor_equipo.end()){
                 defensores.push_back(get<0>(jugador));
             }
         }        
 
         // Guardamos la respuesta
         vector<string> res;
-        for (const auto& jugador : max_equipo) {
+        for (const auto& jugador : mejor_equipo) {
             res.push_back(get<0>(jugador));
         }
         for (int j = 0; j < 5; j++) {
