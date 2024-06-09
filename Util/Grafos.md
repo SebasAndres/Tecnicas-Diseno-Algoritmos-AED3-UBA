@@ -11,10 +11,14 @@ $n_G = |V|$
 
 $m_G = |X|$
 
+$N(v)$: es el conjunto de vertices que son adyacentes a v.
+
+$d(v) = |N(n)|$
+
 
 ## Tipos de grafos
 
-- <b>Multigrafo</b>: Es un grafo en el que puede haber varias aristas entre elmismo par de vertices distintos.
+- <b>Multigrafo</b>: Es un grafo en el que puede haber varias aristas entre el mismo par de vertices distintos.
 
 - <b>Pseudografo</b>: Es un grafo en el que puede haber varias aristas entre cada par de vertices y tambien haber aristas que unan a un vertice con si mismo (multigrafo + loops).
 
@@ -25,7 +29,6 @@ Llamamos $\Delta(G)$ al maximo grado de los vertices de $G$ y $\delta(G)$ al min
 
 ### Teorema
 $$\sum_{v \in V} d(v) = 2m$$
-
 
 ### Grafo complementario
 Dado un grafo $G=(V,X)$, su grafo complemento $\bar G = (V, \bar X) = G^c$ es el grafo con el mismo conjunto de vertices y con los ejes tales que un par de vertices es adyacente si solo si no son adyacentes en $G$.
@@ -78,13 +81,14 @@ Un <b>circuito simple o ciclo</b> es un circuito de 3 o mas vertices que no pasa
 
 ## Clasificacion de grafos
 
-
 ### Conexos
 - Un grafo se dice <b>conexo</b> si existe camino entre todo par de vertices.
 
 - Una <b>componente conexa</b> de un grafo G es un subgrafo conexo maximal de G.
 
 - Un grafo conexo se dice biconexo si para desconectarlo no alcanza con suprimir un vertice, es decir, si no tiene vértices de corte.
+
+- Un grafo se dice <b> fuertemente conexo</b> si es dirigido y todos sus vertices tienen camino entre si (hay ida y vuelta por otro camino).
 
 ### Bipartitos
 - Un grafo es bipartito si existen dos conjuntos disjuntos ($V_1, V_2$) entre los vertices tales que todas las aristas tienen un extremo en distintos subconjuntos.

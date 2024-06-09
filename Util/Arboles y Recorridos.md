@@ -115,14 +115,21 @@ Tenemos dos opciones:
 - <b>Breadth-First Search</b>: Se visita cada vertice en un nivel antes de pasar al siguiente nivel. Se implementa con una cola.
 
     Usos:     
-    1. Calcular distancias.
-    2. 
+    1. Encontrar componentes (fuertemente) conexas.
+    2. Ver si un grafo es conexo.
+    3. Encontrar ditancia de aristas uno a todos.
+    4. Ver si un (di)grafo tiene ciclos.
+    5. Etc
+
 
 - <b>Depth-First Search</b>: Se explora por cada rama lo mas profundo posible antes de retroceder. Se implementa con una pila.
 
     Usos:  
-    1. .
-
+    1. Encontrar componentes (fuertemente) conexas.
+    2. Ver si un grafo es conexo.
+    3. Ver si un (di)grafo tiene ciclos.
+    4. Encontrar puentes y puntos de articulacion.
+    5. Etc
 
 ### Tipos de arcos en un digrafo:
 Si aplicamos DFS para enumerar los vertices de un digrafo, podemos clasificar a los arcos en 4 tipos:
@@ -141,4 +148,53 @@ Para cualquier par de intervalos `(desde[i], hasta[i]), (desde[j], hasta[j])`:
 - o hay una relacion de contencion entre ellos
 - o son disjuntos
 
-Entonces vale que:
+Entonces vale que, para un arco $i \rightarrow j$:
+- Es tree edge si: $i = pred[j]$
+- Es backward edge: si $(desde_j, hasta_j)$ contiene a $(desde_i, hasta_i)$
+- Es forward edge: si $(desde_i, hasta_i)$ contiene a $(desde_j,hasta_j)$ y $i\neq pred_j$
+- Es cross edge: si $hasta_j < desde_i$
+
+## Generación del Árbol Generador (AG) mediante DFS
+
+Para generar un árbol generador (AG) de un grafo $G$ utilizando el recorrido en profundidad (DFS, por sus siglas en inglés Depth-First Search), inicias seleccionando un vértice como raíz (en este caso $r$) y a partir de ahí, exploras tan profundo como sea posible a lo largo de cada rama antes de retroceder. Este proceso se repite para todos los vértices no visitados hasta que se haya visitado cada vértice del grafo $G$, asegurando que el algoritmo atraviese todo el grafo.
+
+Durante el recorrido DFS, cada vez que visitas un nuevo vértice, creas una arista en el AG desde el vértice actual hasta el nuevo vértice visitado. Este conjunto de aristas formará tu árbol generador $T$ de $G$. Es importante notar que en un AG, por definición, no hay ciclos, y cada vértice (excepto la raíz) tiene exactamente un vértice padre.
+
+Propiedades de un Árbol DFS Profundización antes de expansión: 
+
+1. El DFS explora tan lejos como sea posible a lo largo de cada rama antes de retroceder. Esto significa que el árbol DFS puede alcanzar nodos "profundos" rápidamente, lo cual es útil para tareas como encontrar componentes conexas en un grafo.
+
+2. Ciclos y Back Edges: El DFS puede identificar back edges, que son aristas que apuntan a un ancestro en el árbol DFS. Estas aristas son cruciales para identificar ciclos dentro del grafo, lo que es relevante para tu primer ejercicio, ya que una arista que forma parte de un ciclo no puede ser un puente.
+
+3. Utilización de la pila: El DFS utiliza una pila (explícitamente o mediante la recursión) para gestionar el proceso de búsqueda, lo que impacta en el orden en el que se visitan y se descubren los nodos.
+
+
+#### Aristas en $E(G) - E(T)$:
+
+Si una arista (vw) está en (E(G)) pero no en (E(T)), significa que esta arista no fue utilizada para formar el árbol DFS. Esto puede suceder por dos razones principales en un grafo conexo:
+
+1. Durante el recorrido DFS, uno de los vértices (v) o (w) fue visitado antes que el otro. Esto implica que, en el momento de considerar la arista (vw), uno de los vértices ya era parte del árbol DFS y, por ende, el otro vértice se conectó al árbol a través de otra arista. En este escenario, el vértice visitado primero es ancestro del visitado después en el árbol DFS, ya que el proceso de DFS asegura un camino continuo desde el vértice raíz del árbol DFS hasta cada vértice que se va añadiendo.
+
+2. La conexión (vw) podría haber creado un ciclo si se hubiera incluido en (T). Dado que un árbol no puede tener ciclos por definición, y el árbol DFS se construye asegurando esto, cualquier arista que pudiera generar un ciclo se excluye de (E(T)). Sin embargo, al ser (G) un grafo conexo y (T) un árbol que abarca todos los vértices de (G), la exclusión de (vw) de (E(T)) implica necesariamente que existe otro camino en (T) que conecta (v) y (w), confirmando que uno de estos vértices es ancestro del otro en el árbol DFS.
+
+## Generación del Árbol Generador (AG) mediante BFS
+
+La generacion del AG tiene la misma idea que en un DFS pero el  recorrido en este caso es con BFS.
+
+Propiedades de un Árbol BFS Expansión nivel por nivel: 
+
+1. El BFS explora todos los vecinos de un nodo antes de moverse a los nodos en el siguiente nivel. Esto asegura que si existe un camino entre dos nodos, el BFS encontrará el camino más corto en términos de aristas atravesadas.
+
+2. Capas y distancia mínima: Cada nodo descubierto en un árbol BFS está lo más cerca posible del nodo raíz en términos de la cantidad de aristas. Esto es especialmente útil para calcular distancias mínimas y para algoritmos de ruta más corta en grafos sin ponderar.
+
+3. Utilización de la cola: El BFS utiliza una cola para gestionar el orden de visita de los nodos, asegurando que se explore cada nivel completamente antes de pasar al siguiente.
+
+## Tips ejs grafos:
+
+#### Teorema de Robbins:
+Este teorema establece que un grafo no dirigido tiene una orientación fuertemente conexa si y solo si es biconexo. Un grafo es biconexo si no contiene vértices de corte, es decir, su eliminación (junto con las aristas incidentes) no aumenta el número de componentes conexas del grafo.
+
+### Algoritmo para encontrar una orientación fuertemente conexa:
+Paso 1: Verificar si el grafo (G) es biconexo, es decir, si hay puntos de corte. 
+Paso 2: Si el grafo (G) es biconexo, entonces procede a orientar sus aristas para hacerlo fuertemente conexo. Si no es biconexo, entonces no es posible encontrar tal orientación. Una forma de orientar las aristas de un grafo biconexo es realizar un recorrido DFS y orientar todas las aristas en la dirección del recorrido. Esto garantiza que haya al menos un camino dirigido entre cualquier par de vértices.
+Si G no es biconexo no hay un D(T) fuertemente conexo.
