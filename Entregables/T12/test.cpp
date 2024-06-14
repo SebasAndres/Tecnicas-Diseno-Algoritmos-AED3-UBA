@@ -1,77 +1,108 @@
 #include <iostream>
 #include <vector>
-#include <unordered_map>
+#include <limits>
 #include <algorithm>
-#include <limits.h>
+#include <unordered_set>
+#include <unordered_map>
+
 using namespace std;
 
-long long solve(vector<int> nodes, int L[500][500], vector<int>& order) {
+#define MAX_NODES 500
 
-    // Orden de destruccion inverso = orden de restauracion
+class Graph {
+public:
+    unordered_set<int> nodes;
+    int L[MAX_NODES][MAX_NODES] = {0};
+     
+    Graph(int nodes) {
+        for(int i=0; i<nodes; i++) {
+            this->nodes.insert(i);
+        }
+    }
+};
+
+int solve(Graph& g, vector<int>& order) {
+    int (*D)[MAX_NODES][MAX_NODES];
+    D = &g.L;
+
+    // cout << endl;
+    // cout << "D" << endl;
+    // for(int i=0; i<g.nodes.size(); i++){
+    //     for(int j=0; j<g.nodes.size(); j++){
+    //         cout << (*D)[i][j] << " ";
+    //     }
+    //     cout << endl;
+    // }
+    // cout << endl;
+
+    unordered_set<int> S;
+    int t = numeric_limits<int>::max();
     reverse(order.begin(), order.end());
 
-    // Inicializamos D = L
-    auto& D = L; 
+    int acc = 0;
+    for(int k : order) {
 
-    long long energy = 0;
-    vector<int> S(order.size(), 0);
-
-    for (int k : order) {
-
-        // Habilito el nodo K
-        S[k] = 1;
-
-        // Actualizo todos los caminos minimos con el nodo restaurado como pivot
-        for (int u : nodes) {
-            for (int v : nodes)
-                D[u][v] = min(D[u][v], D[u][k] + D[k][v]);
+        // Calculo las distancias de cada {1...k-1} respecto al pivot K (ida y vuelta)
+        for(int i : S) {
+            for(int j : S) { // j: pivot
+                (*D)[i][k] = min((*D)[i][k], (*D)[i][j] + g.L[j][k]); // ida 
+                (*D)[k][i] = min((*D)[k][i], (*D)[k][j] + g.L[j][i]); // vuelta
+            }
+            t = min(t, (*D)[k][i] + (*D)[i][k]);
         }
 
-        // Sumamos las distancias minimas de los nodos restaurados
-        for (int u : nodes) {
-            if (S[u]) {
-                for (int v : nodes) {
-                    if (S[u] && S[v])
-                        energy += D[u][v];
-                }
+        if(t < 0) {
+            return -1; // Existe ciclo negativo
+        }
+
+        // Recalculo las distancias entre los elementos de {1..k-1} con k como pivot
+        for(int i : S) {
+            for(int j : S) {
+                (*D)[i][j] = min((*D)[i][j], (*D)[i][k] + (*D)[k][j]);
+            }
+        }
+
+        // Agregamos el nodo a Gk+1
+        S.insert(k);
+
+        // Sumador de distancias!
+        for(int i : S) {
+            for(int j : S) {
+                acc += (*D)[i][j];
             }
         }
     }
 
-    return energy;
+    return acc;
 }
 
 int main() {
     int testCases;
     cin >> testCases;
-    vector<long long> res(testCases, -1);
-
-    for (int t = 0; t < testCases; ++t) {
+    vector<int> res(testCases, -1);
+    for(int t = 0; t < testCases; ++t) {
         // Input
         int n;
         cin >> n;
-        vector<int> nodes(n);
-        for (int i = 0; i < n; ++i) {
-            nodes[i] = i;
-        }
-        int L[500][500];
+        Graph g(n);        
         for(int tower = 0; tower < n; ++tower) {
             for (int i = 0; i < n; ++i) {
-                int w;
-                cin >> w;
-                L[tower][i] = w;
+                int ws; cin >> ws;
+                g.L[tower][i] = ws;
             }
         }
+
         vector<int> order(n);
         for (int i = 0; i < n; ++i) {
             cin >> order[i];
         }
-        int val = solve(nodes, L, order);
+        int val = solve(g, order);
         res[t] = val;
     }
 
-    for (auto t : res) 
+    for (int t : res) {
         cout << t << endl;
+    }
 
     return 0;
 }
