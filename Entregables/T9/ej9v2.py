@@ -49,7 +49,7 @@ def psa():
     for _ in range(T):
         entrada = input().split()  # Dividir la entrada en componentes
         N = int(entrada[0])  # Convertir el primer componente a un entero
-        contrasenas = entrada[1:]  # El resto de la entrada son las contraseñas
+-        contrasenas = entrada[1:]  # El resto de la entrada son las contraseñas
         g = Grafo()
         if N == 1:
             res.append(sum(diff_minima(int(d1), int(d2)) for d1, d2 in zip(contrasenas[0], "0000")))
